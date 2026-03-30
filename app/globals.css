@@ -1,26 +1,89 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f6f4ee;
+  --surface: rgba(255, 255, 255, 0.85);
+  --text-primary: #112426;
+  --text-secondary: #425153;
+  --accent-deep: #0f3d3e;
+  --accent-warm: #f4ad4d;
+  --font-sans:
+    "Avenir Next", "Noto Sans SC", "PingFang SC", "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-serif: "Iowan Old Style", Charter, "Noto Serif SC", "Songti SC", Georgia, serif;
 }
 
 @theme inline {
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-surface: var(--surface);
+  --color-foreground: var(--text-primary);
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  color: var(--text-primary);
+  background:
+    linear-gradient(120deg, rgba(244, 173, 77, 0.08), transparent 30%),
+    linear-gradient(-120deg, rgba(15, 61, 62, 0.08), transparent 32%),
+    var(--background);
+  font-family: var(--font-sans);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+::selection {
+  background: rgba(244, 173, 77, 0.34);
+}
+
+.section-card {
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 1.5rem;
+  background: var(--surface);
+  box-shadow: 0 14px 28px rgba(18, 33, 33, 0.08);
+}
+
+.mdx-content {
+  color: var(--text-secondary);
+  line-height: 1.9;
+  font-size: 1.02rem;
+}
+
+.mdx-content h2,
+.mdx-content h3 {
+  margin-top: 1.7rem;
+  margin-bottom: 0.8rem;
+  color: var(--text-primary);
+  font-family: var(--font-serif);
+  line-height: 1.3;
+}
+
+.mdx-content p,
+.mdx-content ul,
+.mdx-content ol {
+  margin: 0.9rem 0;
+}
+
+.mdx-content ul,
+.mdx-content ol {
+  padding-left: 1.1rem;
+}
+
+.mdx-content code {
+  border-radius: 0.4rem;
+  padding: 0.12rem 0.4rem;
+  background: rgba(15, 61, 62, 0.1);
+  color: #0f3d3e;
 }

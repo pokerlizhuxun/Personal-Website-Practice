@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Personal Website (Next.js + Bilingual + MDX)
 
-## Getting Started
+一个用于个人简历与项目发布的双语网站模板，基于 `Next.js App Router` 构建。
 
-First, run the development server:
+## Features
+
+- `zh/en` 双语路由（默认重定向到 `/zh`）
+- 四页结构：`/{locale}`、`/{locale}/projects`、`/{locale}/about`、`/{locale}/contact`
+- 项目内容使用 MDX（`content/projects/*.mdx`）
+- 页面级 SEO：metadata、`sitemap.xml`、`robots.txt`
+- `www` 自动重定向到裸域（`proxy.ts`）
+- 适配 Vercel 部署
+
+## Local Development
+
+1. 安装 Node.js 20（推荐使用 `.nvmrc`）
+2. 安装依赖：
+
+```bash
+npm install
+```
+
+3. 复制环境变量并填写真实信息：
+
+```bash
+cp .env.example .env.local
+```
+
+4. 启动开发环境：
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+5. 质量检查：
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run lint
+npm run build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Content Management
 
-## Learn More
+### 项目内容（MDX）
 
-To learn more about Next.js, take a look at the following resources:
+- 目录：`content/projects/`
+- 文件示例：`uav-swarm-planning.zh.mdx`、`uav-swarm-planning.en.mdx`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Frontmatter 字段：
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```yaml
+slug: uav-swarm-planning
+locale: zh # or en
+title: 项目标题
+summary: 一句话概述
+date: "2025-03-01"
+stack:
+  - Next.js
+  - TypeScript
+links:
+  demo: https://your-demo-url
+  repo: https://github.com/your/repo
+featured: true
+```
 
-## Deploy on Vercel
+说明：`links.demo` 和 `links.repo` 可选，若没有公开链接可省略。
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 简历内容
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- 文件：`lib/profile.ts`
+- 中英文内容分别维护在 `zh` / `en` 对象中。
+
+## Deploy to Vercel
+
+1. 将项目推送到你的 GitHub 仓库。
+2. 在 Vercel 选择该仓库创建项目（Framework: Next.js）。
+3. 在 Vercel Project Settings -> Environment Variables 中设置 `.env.local` 对应变量。
+4. 在 Domains 中添加：
+   - 裸域（如 `yourdomain.com`）
+   - `www` 子域（如 `www.yourdomain.com`）
+5. DNS 按 Vercel 指引配置完成后，`www` 会通过 `proxy.ts` 自动 301 到裸域。
+
+## Notes
+
+- 若你希望根路径默认英文，可将 `lib/i18n.ts` 中 `defaultLocale` 改为 `en`。
+- 若需要博客模块，可在现有 MDX 方案上新增 `content/blog` 与 `/[locale]/blog` 路由。
+- 当前站点默认公开邮箱，不公开手机号、出生年月、籍贯、政治面貌等隐私字段。
