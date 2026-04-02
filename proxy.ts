@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { defaultLocale, locales } from "@/lib/i18n";
 
 const PUBLIC_FILE = /\.[^/]+$/;
+const CANONICAL_WWW_HOST = "www.antlerbadge.ltd";
+const APEX_HOST = "antlerbadge.ltd";
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -11,11 +13,12 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const host = request.headers.get("host") || "";
+  const hostHeader = request.headers.get("host") || "";
+  const hostname = hostHeader.split(":")[0].toLowerCase();
 
-  if (host.startsWith("www.")) {
+  if (hostname === APEX_HOST) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.host = host.slice(4);
+    redirectUrl.host = CANONICAL_WWW_HOST;
     return NextResponse.redirect(redirectUrl, 301);
   }
 

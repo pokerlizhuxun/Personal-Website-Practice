@@ -17,7 +17,7 @@
 - 项目内容使用 MDX 管理
 - 页面级 SEO（Metadata、`sitemap.xml`、`robots.txt`）
 - 根路径自动跳转默认语言
-- `www` 自动跳转裸域
+- 裸域自动跳转 `www`
 
 ## 2. 技术栈
 
@@ -231,7 +231,7 @@ featured: true
 
 策略：
 
-- `www.xxx.com` -> `xxx.com`（301）
+- `xxx.com` -> `www.xxx.com`（301）
 - 无语言前缀路径 -> 自动补默认语言（307）
 
 ## 9. 本地开发与发布
@@ -278,4 +278,3 @@ npm run build
 1. 打开 `lib/i18n.ts`
 2. 修改 `defaultLocale` 为 `zh` 或 `en`
 3. 本地验证 `/` 跳转是否符合预期
-

@@ -8,7 +8,7 @@
 - 四页结构：`/{locale}`、`/{locale}/projects`、`/{locale}/about`、`/{locale}/contact`
 - 项目内容使用 MDX（`content/projects/*.mdx`）
 - 页面级 SEO：metadata、`sitemap.xml`、`robots.txt`
-- `www` 自动重定向到裸域（`proxy.ts`）
+- 裸域自动重定向到 `www`（`proxy.ts`）
 - 适配 Vercel 部署
 
 ## Local Development
@@ -81,7 +81,7 @@ featured: true
 5. 在 Domains 中添加：
    - 裸域（如 `yourdomain.com`）
    - `www` 子域（如 `www.yourdomain.com`）
-6. DNS 按 Vercel 指引配置完成后，`www` 会通过 `proxy.ts` 自动 301 到裸域。
+6. DNS 按 Vercel 指引配置完成后，裸域会通过 `proxy.ts` 自动 301 到 `www`。
 
 ## Notes
 
