@@ -26,6 +26,8 @@ npm install
 cp .env.example .env.local
 ```
 
+`NEXT_PUBLIC_SITE_URL` 如果暂时留空，本地会回退到 `http://localhost:3000`，部署到 Vercel 时会优先使用项目的生产域名；如果你后续绑定了自定义域名，也可以手动填成正式域名。
+
 4. 启动开发环境：
 
 ```bash
@@ -75,10 +77,11 @@ featured: true
 1. 将项目推送到你的 GitHub 仓库。
 2. 在 Vercel 选择该仓库创建项目（Framework: Next.js）。
 3. 在 Vercel Project Settings -> Environment Variables 中设置 `.env.local` 对应变量。
-4. 在 Domains 中添加：
+4. `NEXT_PUBLIC_SITE_URL` 可以先留空使用 Vercel 自动域名；如果后续绑定自定义域名，再改成正式域名即可。
+5. 在 Domains 中添加：
    - 裸域（如 `yourdomain.com`）
    - `www` 子域（如 `www.yourdomain.com`）
-5. DNS 按 Vercel 指引配置完成后，`www` 会通过 `proxy.ts` 自动 301 到裸域。
+6. DNS 按 Vercel 指引配置完成后，`www` 会通过 `proxy.ts` 自动 301 到裸域。
 
 ## Notes
 
