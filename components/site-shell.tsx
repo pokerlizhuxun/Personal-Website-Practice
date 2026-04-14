@@ -16,13 +16,14 @@ export function SiteShell({ locale, dictionary, children }: SiteShellProps) {
     { href: `/${locale}/projects`, label: dictionary.nav.projects },
     { href: `/${locale}/about`, label: dictionary.nav.about },
     { href: `/${locale}/contact`, label: dictionary.nav.contact },
+    { href: `/${locale}/attendance`, label: dictionary.nav.attendance },
   ];
 
   return (
     <div className="relative min-h-screen overflow-hidden">
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_20%,rgba(244,173,77,0.18),transparent_40%),radial-gradient(circle_at_80%_8%,rgba(15,61,62,0.16),transparent_42%),radial-gradient(circle_at_60%_70%,rgba(12,137,115,0.12),transparent_36%)]" />
       <header className="sticky top-0 z-40 border-b border-black/5 bg-white/75 backdrop-blur-xl">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-6 py-4">
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
           <Link href={`/${locale}`} className="flex flex-col leading-none">
             <span className="text-sm font-semibold uppercase tracking-[0.14em] text-[#0f3d3e]">
               {siteConfig.ownerName}
@@ -42,12 +43,28 @@ export function SiteShell({ locale, dictionary, children }: SiteShellProps) {
 
           <LocaleSwitcher currentLocale={locale} />
         </div>
+
+        <nav className="border-t border-black/5 md:hidden">
+          <div className="mx-auto w-full max-w-6xl overflow-x-auto px-4 py-2 [scrollbar-width:none] sm:px-6 [&::-webkit-scrollbar]:hidden">
+            <div className="flex w-max items-center gap-2">
+              {navItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="rounded-full border border-black/10 bg-white/80 px-3 py-1.5 text-xs font-semibold text-[#2a2f30] transition hover:border-[#0f3d3e]/45 hover:text-[#0f3d3e]"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </nav>
       </header>
 
-      <main className="mx-auto flex w-full max-w-6xl flex-1 px-6 py-10">{children}</main>
+      <main className="mx-auto flex w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 sm:py-10">{children}</main>
 
       <footer className="mt-12 border-t border-black/5">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-6 py-6 text-sm text-[#4d5759] sm:flex-row sm:items-center sm:justify-between">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-6 text-sm text-[#4d5759] sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <span>{dictionary.footer}</span>
           <span>{new Date().getFullYear()} {siteConfig.ownerName}</span>
         </div>

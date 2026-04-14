@@ -2,7 +2,7 @@ import { createHash, timingSafeEqual } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { createClient } from "redis";
-import type { AttendanceData } from "@/types/attendance";
+import type { AttendanceData, AttendanceEntry, AttendanceStatus } from "@/types/attendance";
 
 export const ATTENDANCE_ADMIN_COOKIE = "attendance_admin";
 
@@ -21,8 +21,13 @@ const defaultAttendanceData: AttendanceData = {
   leaveDays: 0,
   remoteDays: 0,
   notes: "",
+  entries: [],
+  fixedOffDates: [],
   updatedAt: new Date(0).toISOString(),
 };
+
+const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+const validStatuses: AttendanceStatus[] = ["present", "leave", "off", "unset"];
 
 function toSafeString(value: unknown, fallback = ""): string {
   return typeof value === "string" ? value.trim() : fallback;
@@ -37,6 +42,94 @@ function toSafeInt(value: unknown, fallback = 0): number {
 
   const normalized = Math.floor(num);
   return normalized < 0 ? 0 : normalized;
+}
+
+function isValidDateKey(value: string): boolean {
+  if (!datePattern.test(value)) {
+    return false;
+  }
+
+  const [yearText, monthText, dayText] = value.split("-");
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+
+  if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) {
+    return false;
+  }
+
+  if (year < 1900 || year > 2200 || month < 1 || month > 12 || day < 1 || day > 31) {
+    return false;
+  }
+
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return (
+    date.getUTCFullYear() === year &&
+    date.getUTCMonth() + 1 === month &&
+    date.getUTCDate() === day
+  );
+}
+
+function normalizeStatus(value: unknown): AttendanceStatus {
+  if (typeof value === "string" && validStatuses.includes(value as AttendanceStatus)) {
+    return value as AttendanceStatus;
+  }
+
+  return "unset";
+}
+
+function normalizeAttendanceEntries(value: unknown): AttendanceEntry[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  const deduped = new Map<string, AttendanceEntry>();
+
+  for (const item of value) {
+    if (!item || typeof item !== "object") {
+      continue;
+    }
+
+    const record = item as Record<string, unknown>;
+    const date = toSafeString(record.date, "");
+
+    if (!isValidDateKey(date)) {
+      continue;
+    }
+
+    const note = toSafeString(record.note, "");
+    const overtimeHoursRaw = record.overtimeHours;
+    const overtimeHours =
+      overtimeHoursRaw === undefined || overtimeHoursRaw === null
+        ? undefined
+        : Math.max(0, Number(overtimeHoursRaw));
+
+    deduped.set(date, {
+      date,
+      status: normalizeStatus(record.status),
+      note: note || undefined,
+      overtimeHours: Number.isFinite(overtimeHours) ? overtimeHours : undefined,
+    });
+  }
+
+  return Array.from(deduped.values()).sort((a, b) => a.date.localeCompare(b.date));
+}
+
+function normalizeFixedOffDates(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  const deduped = new Set<string>();
+
+  for (const item of value) {
+    const date = toSafeString(item, "");
+    if (isValidDateKey(date)) {
+      deduped.add(date);
+    }
+  }
+
+  return Array.from(deduped).sort((a, b) => a.localeCompare(b));
 }
 
 function normalizeAttendanceData(raw: unknown): AttendanceData {
@@ -57,6 +150,8 @@ function normalizeAttendanceData(raw: unknown): AttendanceData {
     leaveDays: toSafeInt(record.leaveDays),
     remoteDays: toSafeInt(record.remoteDays),
     notes: toSafeString(record.notes),
+    entries: normalizeAttendanceEntries(record.entries),
+    fixedOffDates: normalizeFixedOffDates(record.fixedOffDates),
     updatedAt: Number.isNaN(parsedUpdatedAt)
       ? new Date().toISOString()
       : new Date(parsedUpdatedAt).toISOString(),
@@ -69,6 +164,8 @@ function clampAttendanceData(data: AttendanceData): AttendanceData {
   const lateDays = Math.max(0, data.lateDays);
   const leaveDays = Math.max(0, data.leaveDays);
   const remoteDays = Math.max(0, data.remoteDays);
+  const entries = normalizeAttendanceEntries(data.entries);
+  const fixedOffDates = normalizeFixedOffDates(data.fixedOffDates);
 
   return {
     ...data,
@@ -77,6 +174,8 @@ function clampAttendanceData(data: AttendanceData): AttendanceData {
     lateDays,
     leaveDays,
     remoteDays,
+    entries,
+    fixedOffDates,
   };
 }
 

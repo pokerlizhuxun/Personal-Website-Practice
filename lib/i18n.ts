@@ -15,6 +15,7 @@ export interface SiteDictionary {
     projects: string;
     about: string;
     contact: string;
+    attendance: string;
   };
   home: {
     badge: string;
@@ -66,6 +67,7 @@ export const dictionaries: Record<Locale, SiteDictionary> = {
       projects: "项目",
       about: "关于",
       contact: "联系",
+      attendance: "实习统计",
     },
     home: {
       badge: "北京航空航天大学 · 电子信息硕士 · AI Agent 方向",
@@ -116,6 +118,7 @@ export const dictionaries: Record<Locale, SiteDictionary> = {
       projects: "Projects",
       about: "About",
       contact: "Contact",
+      attendance: "Internship Stats",
     },
     home: {
       badge: "Beihang University · M.Eng. in Electronic Information · AI Agent Track",

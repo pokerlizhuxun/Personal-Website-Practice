@@ -7,5 +7,37 @@
   "leaveDays": 3,
   "remoteDays": 0,
   "notes": "Temporary tracker. Update this section after admin login.",
+  "entries": [
+    {
+      "date": "2026-04-01",
+      "status": "present",
+      "note": "完成周报与实验复盘"
+    },
+    {
+      "date": "2026-04-02",
+      "status": "present",
+      "overtimeHours": 2,
+      "note": "加班处理联调问题"
+    },
+    {
+      "date": "2026-04-03",
+      "status": "leave",
+      "note": "病假半天"
+    },
+    {
+      "date": "2026-04-07",
+      "status": "present",
+      "note": "参与需求评审"
+    },
+    {
+      "date": "2026-04-10",
+      "status": "off",
+      "note": "固定不去"
+    }
+  ],
+  "fixedOffDates": [
+    "2026-04-10",
+    "2026-04-17"
+  ],
   "updatedAt": "2026-04-14T00:00:00.000Z"
 }

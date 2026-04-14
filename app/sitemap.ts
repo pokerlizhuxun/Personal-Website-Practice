@@ -3,7 +3,7 @@ import { locales } from "@/lib/i18n";
 import { listAllProjects } from "@/lib/projects";
 import { siteConfig } from "@/lib/site";
 
-const staticPaths = ["", "/projects", "/about", "/contact"];
+const staticPaths = ["", "/projects", "/about", "/contact", "/attendance"];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = locales.flatMap((locale) =>

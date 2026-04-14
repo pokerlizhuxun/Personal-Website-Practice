@@ -1,3 +1,12 @@
+export type AttendanceStatus = "present" | "leave" | "off" | "unset";
+
+export interface AttendanceEntry {
+  date: string;
+  status: AttendanceStatus;
+  note?: string;
+  overtimeHours?: number;
+}
+
 export interface AttendanceData {
   internshipName: string;
   period: string;
@@ -7,5 +16,7 @@ export interface AttendanceData {
   leaveDays: number;
   remoteDays: number;
   notes: string;
+  entries: AttendanceEntry[];
+  fixedOffDates: string[];
   updatedAt: string;
 }
