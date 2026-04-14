@@ -1,0 +1,11 @@
+{
+  "internshipName": "Internship Attendance",
+  "period": "2026-Q2",
+  "requiredDays": 60,
+  "presentDays": 56,
+  "lateDays": 1,
+  "leaveDays": 3,
+  "remoteDays": 0,
+  "notes": "Temporary tracker. Update this section after admin login.",
+  "updatedAt": "2026-04-14T00:00:00.000Z"
+}

@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AttendanceModule } from "@/components/attendance-module";
+import { isAttendanceAdminEnabled, readAttendanceData } from "@/lib/attendance";
 import { ProjectCard } from "@/components/project-card";
 import { dictionaries, isLocale } from "@/lib/i18n";
 import { listProjects } from "@/lib/projects";
 import { siteConfig } from "@/lib/site";
+
+export const dynamic = "force-dynamic";
 
 type HomePageProps = {
   params: Promise<{ locale: string }>;
@@ -41,6 +45,8 @@ export default async function HomePage({ params }: HomePageProps) {
 
   const dict = dictionaries[locale];
   const featuredProjects = await listProjects(locale, true);
+  const attendanceData = await readAttendanceData();
+  const attendanceAuthEnabled = isAttendanceAdminEnabled();
 
   return (
     <div className="space-y-8">
@@ -89,6 +95,12 @@ export default async function HomePage({ params }: HomePageProps) {
           </div>
         </div>
       </section>
+
+      <AttendanceModule
+        locale={locale}
+        initialData={attendanceData}
+        initialAuthEnabled={attendanceAuthEnabled}
+      />
 
       <section className="space-y-4">
         <div className="flex flex-wrap items-end justify-between gap-4">
