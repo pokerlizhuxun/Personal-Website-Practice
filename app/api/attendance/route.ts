@@ -46,7 +46,7 @@ export async function PUT(request: Request) {
     return NextResponse.json(
       {
         message:
-          "Unable to save attendance data. Configure KV_REST_API_URL and KV_REST_API_TOKEN on Vercel for persistent writes.",
+          "Unable to save attendance data. Configure KV_REDIS_URL on Vercel for persistent writes.",
       },
       { status: 500 },
     );

@@ -1,12 +1,16 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { createClient } from "redis";
 import type { AttendanceData } from "@/types/attendance";
 
 export const ATTENDANCE_ADMIN_COOKIE = "attendance_admin";
 
 const attendanceFilePath = path.join(process.cwd(), "content", "attendance.json");
 const attendanceKvKey = process.env.ATTENDANCE_KV_KEY?.trim() || "attendance:data";
+const redisUrl = process.env.KV_REDIS_URL?.trim() || "";
+type AttendanceRedisClient = ReturnType<typeof createClient>;
+let redisClientPromise: Promise<AttendanceRedisClient> | null = null;
 
 const defaultAttendanceData: AttendanceData = {
   internshipName: "Internship Attendance",
@@ -91,92 +95,31 @@ function safeCompare(a: string, b: string): boolean {
   return timingSafeEqual(aBuffer, bBuffer);
 }
 
-function resolveKvConfig():
-  | {
-      url: string;
-      token: string;
-    }
-  | null {
-  const url =
-    process.env.KV_REST_API_URL?.trim() || process.env.UPSTASH_REDIS_REST_URL?.trim() || "";
-  const token =
-    process.env.KV_REST_API_TOKEN?.trim() || process.env.UPSTASH_REDIS_REST_TOKEN?.trim() || "";
-
-  if (!url || !token) {
-    return null;
-  }
-
-  return { url: url.replace(/\/$/, ""), token };
+function isRedisConfigured(): boolean {
+  return Boolean(redisUrl);
 }
 
-async function kvGetJson(key: string): Promise<unknown | null> {
-  const config = resolveKvConfig();
-
-  if (!config) {
-    return null;
+async function getRedisClient(): Promise<AttendanceRedisClient> {
+  if (!redisUrl) {
+    throw new Error("KV_REDIS_URL is not configured");
   }
 
-  const response = await fetch(`${config.url}/get/${encodeURIComponent(key)}`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${config.token}`,
-    },
-    cache: "no-store",
-  });
+  if (!redisClientPromise) {
+    const client = createClient({
+      url: redisUrl,
+    });
 
-  if (!response.ok) {
-    throw new Error(`KV GET failed with status ${response.status}`);
+    client.on("error", () => {
+      // Keep runtime stable; read/write handlers already handle failures.
+    });
+
+    redisClientPromise = (async () => {
+      await client.connect();
+      return client;
+    })();
   }
 
-  const payload = (await response.json()) as {
-    result?: unknown;
-    error?: string;
-  };
-
-  if (payload.error) {
-    throw new Error(payload.error);
-  }
-
-  if (typeof payload.result !== "string") {
-    return null;
-  }
-
-  try {
-    return JSON.parse(payload.result);
-  } catch {
-    return null;
-  }
-}
-
-async function kvSetJson(key: string, value: unknown): Promise<void> {
-  const config = resolveKvConfig();
-
-  if (!config) {
-    throw new Error("KV is not configured");
-  }
-
-  const response = await fetch(`${config.url}/set/${encodeURIComponent(key)}`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${config.token}`,
-      "Content-Type": "text/plain;charset=utf-8",
-    },
-    body: JSON.stringify(value),
-    cache: "no-store",
-  });
-
-  if (!response.ok) {
-    throw new Error(`KV SET failed with status ${response.status}`);
-  }
-
-  const payload = (await response.json()) as {
-    result?: unknown;
-    error?: string;
-  };
-
-  if (payload.error) {
-    throw new Error(payload.error);
-  }
+  return redisClientPromise;
 }
 
 export function isAttendanceAdminEnabled(): boolean {
@@ -218,13 +161,13 @@ export function isAttendanceAdminCookieValid(cookieValue: string | undefined): b
 }
 
 export async function readAttendanceData(): Promise<AttendanceData> {
-  const kvConfig = resolveKvConfig();
-
-  if (kvConfig) {
+  if (isRedisConfigured()) {
     try {
-      const parsed = await kvGetJson(attendanceKvKey);
+      const redis = await getRedisClient();
+      const raw = await redis.get(attendanceKvKey);
 
-      if (parsed) {
+      if (raw) {
+        const parsed = JSON.parse(raw) as unknown;
         return clampAttendanceData(normalizeAttendanceData(parsed));
       }
 
@@ -259,10 +202,9 @@ export async function writeAttendanceData(raw: unknown): Promise<AttendanceData>
     updatedAt: new Date().toISOString(),
   };
 
-  const kvConfig = resolveKvConfig();
-
-  if (kvConfig) {
-    await kvSetJson(attendanceKvKey, nextData);
+  if (isRedisConfigured()) {
+    const redis = await getRedisClient();
+    await redis.set(attendanceKvKey, JSON.stringify(nextData));
     return nextData;
   }
 
